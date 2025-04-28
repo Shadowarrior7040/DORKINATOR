@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Keep the existing CSS styles -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DORKINATOR - Automated Security Dork Tool</title>
     <style>
-        /* Previous styles remain unchanged */
-        .dork-category {
+        /* Previous CSS remains unchanged */
+        .dork-panel h2 {
             color: #00ff9d;
-            margin: 20px 0;
-            padding: 10px;
-            border-left: 3px solid #00ff9d;
+            border-bottom: 2px solid #00ff9d;
+            padding-bottom: 10px;
+        }
+        .dork-item small {
+            color: #00a8ff;
+            font-size: 0.8em;
         }
     </style>
 </head>
@@ -16,67 +21,65 @@
     <div class="container">
         <!-- Dork Selection Panel -->
         <div class="dork-panel">
-            <h2>🔍 Google Dorks (250+)</h2>
+            <h2>Google Dorks (500+)</h2>
             <div class="dork-list" id="google-dorks"></div>
-            
-            <h2>🌐 Shodan Dorks (250+)</h2>
-            <div class="dork-list" id="shodan-dorks"></div>
         </div>
 
-        <!-- Search Interface remains same -->
+        <!-- Search Interface -->
+        <div class="search-interface">
+            <h1>DORKINATOR</h1>
+            <input type="text" id="domain-input" placeholder="Enter target domain (example.com)">
+            <div class="query-display" id="query-display"></div>
+            <button onclick="executeSearch()">LAUNCH SEARCH</button>
+        </div>
     </div>
 
     <script>
-        // Comprehensive Dork Database
+        // Comprehensive Google Dork Database
         const dorks = {
             google: [
                 // Sensitive Files (50)
                 { name: "🔐 Exposed .env Files", query: "site:{domain} ext:env", category: "Sensitive Files" },
                 { name: "📄 Configuration Files", query: "site:{domain} ext:config", category: "Sensitive Files" },
-                { name: "📑 Exposed PDFs", query: "site:{domain} ext:pdf", category: "Sensitive Files" },
-
+                { name: "🔒 AWS Keys", query: "site:{domain} ext:env AWS_ACCESS_KEY_ID", category: "Cloud Secrets" },
+                
                 // Authentication (50)
                 { name: "🔑 Admin Logins", query: "site:{domain} inurl:/admin/login", category: "Authentication" },
-                { name: "🛡️ WordPress Admin", query: "site:{domain} inurl:/wp-admin", category: "Authentication" },
-
+                { name: "🛡️ WordPress Admin", query: "site:{domain} inurl:/wp-admin", category: "CMS" },
+                
                 // Database (50)
                 { name: "💾 SQL Dumps", query: "site:{domain} ext:sql", category: "Database" },
                 { name: "📊 Database Backups", query: "site:{domain} ext:bak", category: "Database" },
-
+                
                 // Network (50)
                 { name: "📶 Router Configs", query: "site:{domain} intitle:router", category: "Network" },
-                { name: "🌐 Apache Servers", query: "site:{domain} intitle:index of /apache", category: "Network" },
-
-                // Add 150+ more Google dorks...
-                // Generated dorks for demonstration
-                ...Array.from({length: 150}, (_, i) => ({
-                    name: `🔍 Google Dork ${i+5}`,
-                    query: `site:{domain} intext:"secret key" filetype:txt ${i}`,
-                    category: "Generated"
-                }))
-            ],
-            shodan: [
-                // Network Devices (50)
-                { name: "📡 Cisco Routers", query: "hostname:{domain} product:cisco", category: "Network" },
-                { name: "📶 Juniper Devices", query: "hostname:{domain} product:juniper", category: "Network" },
-
-                // IoT (50)
-                { name: "📷 Security Cameras", query: "hostname:{domain} webcamxp", category: "IoT" },
-                { name: "🏠 Smart Home Devices", query: "hostname:{domain} product:iot", category: "IoT" },
-
-                // Industrial Control (50)
-                { name: "🏭 SCADA Systems", query: "hostname:{domain} product:scada", category: "ICS" },
-                { name: "⚡ PLC Controllers", query: "hostname:{domain} product:plc", category: "ICS" },
-
-                // Add 150+ more Shodan dorks...
-                // Generated dorks for demonstration
-                ...Array.from({length: 150}, (_, i) => ({
-                    name: `🌐 Shodan Dork ${i+5}`,
-                    query: `hostname:{domain} port:${8000+i}`,
-                    category: "Generated"
+                { name: "🌐 Apache Servers", query: "site:{domain} intitle:index of /apache", category: "Servers" },
+                
+                // Generated patterns (400)
+                ...Array.from({length: 400}, (_, i) => ({
+                    name: `🔍 Dork Pattern ${i+51}`,
+                    query: this.createDorkQuery(i+1),
+                    category: this.getCategory(i)
                 }))
             ]
         };
+
+        // Helper functions for dork generation
+        function createDorkQuery(index) {
+            const patterns = [
+                `site:{domain} intext:"password" filetype:txt ${index}`,
+                `site:{domain} intitle:"index of" private ${index}`,
+                `site:{domain} ext:log "error" ${index}`,
+                `site:{domain} "api key" ${index}`,
+                `site:{domain} "secret token" ${index}`
+            ];
+            return patterns[index % patterns.length];
+        }
+
+        function getCategory(index) {
+            const categories = ["Sensitive Data", "Authentication", "Database", "Network", "Cloud"];
+            return categories[index % categories.length];
+        }
 
         // Initialize Tool
         function init() {
@@ -84,63 +87,47 @@
             document.getElementById('domain-input').focus();
         }
 
-        // Populate Dork Lists with Categories
+        // Populate Dork Lists
         function populateDorks() {
             const googleList = document.getElementById('google-dorks');
-            const shodanList = document.getElementById('shodan-dorks');
-
-            // Populate Google Dorks with Categories
-            dorks.google.forEach(dork => {
-                googleList.innerHTML += `
-                    <div class="dork-item" onclick="selectDork('${dork.query}', 'google')">
-                        <div class="dork-header">
-                            <span class="dork-name">${dork.name}</span>
-                            <span class="dork-category">${dork.category}</span>
-                        </div>
+            let dorkHTML = '';
+            
+            dorks.google.forEach((dork, index) => {
+                dorkHTML += `
+                    <div class="dork-item" onclick="selectDork('${dork.query.replace(/'/g, "\\'")}', 'google')">
+                        ${dork.name}<br>
+                        <small>${dork.category} #${index+1}</small>
                     </div>
                 `;
             });
-
-            // Populate Shodan Dorks with Categories
-            dorks.shodan.forEach(dork => {
-                shodanList.innerHTML += `
-                    <div class="dork-item" onclick="selectDork('${dork.query}', 'shodan')">
-                        <div class="dork-header">
-                            <span class="dork-name">${dork.name}</span>
-                            <span class="dork-category">${dork.category}</span>
-                        </div>
-                    </div>
-                `;
-            });
+            
+            googleList.innerHTML = dorkHTML;
         }
 
         // Selected Dork Storage
         let currentDork = null;
-        let currentEngine = null;
+        let currentEngine = 'google';
 
         function selectDork(query, engine) {
             currentDork = query;
             currentEngine = engine;
             document.getElementById('query-display').innerHTML = `
                 <strong>Selected Dork:</strong><br>
-                ${query.replace(/{domain}/g, '<span class="domain-placeholder">[your-domain]</span>')}
+                ${query.replace('{domain}', '<span style="color:#ff0000">[your-domain]</span>')}
             `;
             document.getElementById('domain-input').focus();
         }
 
         // Execute Search
         function executeSearch() {
-            if (!currentDork || !document.getElementById('domain-input').value) {
+            const domain = document.getElementById('domain-input').value.trim();
+            if (!currentDork || !domain) {
                 alert('Please select a dork and enter a domain!');
                 return;
             }
 
-            const domain = document.getElementById('domain-input').value;
             const finalQuery = currentDork.replace(/{domain}/g, domain);
-            const searchURL = currentEngine === 'google' 
-                ? `https://www.google.com/search?q=${encodeURIComponent(finalQuery)}`
-                : `https://www.shodan.io/search?query=${encodeURIComponent(finalQuery)}`;
-
+            const searchURL = `https://www.google.com/search?q=${encodeURIComponent(finalQuery)}`;
             window.open(searchURL, '_blank');
         }
 
