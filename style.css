@@ -1,0 +1,15 @@
+/* Cyber color scheme */
+:root {
+    --primary-color: #00ff9d; /* Matrix green */
+    --background: #0a0a0a; /* Dark background */
+}
+
+/* Terminal-style font */
+body {
+    font-family: 'Courier New', monospace;
+}
+
+/* Glowing effects */
+.header h1 {
+    text-shadow: 0 0 10px var(--primary-color);
+}
