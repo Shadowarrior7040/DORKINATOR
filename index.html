@@ -1,12 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Metadata and CSS links -->
-    <title>DORKINATOR</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DORKINATOR - Advanced Search Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Cyber interface components -->
+    <div class="cyber-container">
+        <header class="main-header">
+            <h1><i class="fas fa-terminal"></i> DORKINATOR v2.0</h1>
+            <p>Advanced Cybersecurity Search Suite</p>
+        </header>
+
+        <div class="tool-grid">
+            <!-- Dork Selection Panel -->
+            <div class="dork-panel">
+                <div class="engine-selector">
+                    <select id="search-engine" onchange="loadDorks()">
+                        <option value="google">Google</option>
+                        <option value="shodan">Shodan</option>
+                    </select>
+                </div>
+                <div class="dork-list" id="dork-list"></div>
+            </div>
+
+            <!-- Search Interface -->
+            <div class="search-panel">
+                <div class="search-box">
+                    <input type="text" id="dork-query" placeholder="Select or type dork...">
+                    <button class="cyber-button" onclick="executeSearch()">
+                        <i class="fas fa-search"></i> LAUNCH
+                    </button>
+                </div>
+                <div class="quick-actions">
+                    <button class="cyber-button" onclick="copyQuery()">
+                        <i class="fas fa-copy"></i> COPY
+                    </button>
+                    <button class="cyber-button" onclick="saveQuery()">
+                        <i class="fas fa-save"></i> SAVE
+                    </button>
+                </div>
+                <div class="history-panel" id="history"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="dorks.js"></script>
     <script src="app.js"></script>
 </body>

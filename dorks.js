@@ -1,19 +1,26 @@
-const dorks = {
+const dorkDatabase = {
     google: [
         {
-            name: "Exposed Backups",
-            query: "filetype:bak",
-            category: "Data Leaks",
-            risk: "High"
+            name: "🔒 Exposed Passwords",
+            query: "filetype:log password",
+            category: "Critical",
+            risk: 5
         },
-        // Add 100+ entries
+        {
+            name: "📷 Unsecured Cameras",
+            query: "inurl:/view.shtml",
+            category: "Devices",
+            risk: 4
+        },
+        // Add 98+ more Google dorks
     ],
     shodan: [
         {
-            name: "Open Databases",
-            query: "product:MySQL",
-            category: "Databases",
-            ports: [3306]
-        }
+            name: "🛡️ Open Firewalls",
+            query: "product:cisco firewall",
+            category: "Network",
+            ports: [80, 443]
+        },
+        // Add 98+ more Shodan dorks
     ]
 };
